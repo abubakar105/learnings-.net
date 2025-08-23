@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -71,20 +73,39 @@ namespace Learnings.Infrastructure.Services.Implementation
         }
 
 
-        public async Task<ResponseBase<UserDto>> GetUserByIdAsync(int id)
+        public async Task<ResponseBase<UserDto>> GetUserByIdAsync(Guid id)
         {
-            var user = await _userRepository.GetUserByIdAsync(id);
-            if (user.Data == null)
+            //var user = await _userRepository.GetUserByIdAsync(id);
+            //if (user.Data == null)
+            //{
+            //    return new ResponseBase<UserDto>(null, "User not found.", HttpStatusCode.NotFound);
+            //}
+
+            //var userDto = new UserDto
+            //{
+            //    FirstName = user.Data.FirstName,
+            //    LastName = user.Data.LastName,
+            //    Email = user.Data.Email,
+            //    PhoneNumber = user.Data.PhoneNumber
+            //};
+            var userIdParam = new SqlParameter("@UserId", SqlDbType.NVarChar, 450) { Value = id.ToString() };
+
+            var users = await _context.Users
+                .FromSqlRaw("EXEC GetUserById @UserId", userIdParam)
+                .ToListAsync();
+
+            if (!users.Any())
             {
                 return new ResponseBase<UserDto>(null, "User not found.", HttpStatusCode.NotFound);
             }
 
+            var user = users.First();
             var userDto = new UserDto
             {
-                FirstName = user.Data.FirstName,
-                LastName = user.Data.LastName,
-                Email = user.Data.Email,
-                PhoneNumber = user.Data.PhoneNumber
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
             };
 
             return new ResponseBase<UserDto>(userDto, "User", HttpStatusCode.OK);

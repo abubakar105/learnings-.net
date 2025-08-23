@@ -6,7 +6,7 @@ namespace Learnings.Application.Services.Interface
 {
     public interface IUserService
     {
-        Task<ResponseBase<UserDto>> GetUserByIdAsync(int id);
+        Task<ResponseBase<UserDto>> GetUserByIdAsync(Guid id);
         Task<ResponseBase<List<UsersDto>>> GetAllUsersAsync();
         Task<ResponseBase<List<Users>>> GetAllUsersAsyncIdentity();
         Task<ResponseBase<List<UsersDto>>> GetAllAdminsAsync();

@@ -23,7 +23,7 @@ namespace Core_Learnings.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ResponseBase<UserDto>>> GetUserById(int id)
+        public async Task<ActionResult<ResponseBase<UserDto>>> GetUserById(Guid id)
         {
             var response = await _userService.GetUserByIdAsync(id);
 
